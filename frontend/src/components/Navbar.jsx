@@ -5,6 +5,7 @@ import { Bell, Menu, X, LogOut, User, LayoutDashboard, ShieldCheck } from "lucid
 import { Logo } from "./Logo";
 import { useAuth } from "../context/AuthContext";
 import api from "../lib/api";
+import { useCallback, useEffect } from "react";
 
 const navLinks = [
   { to: "/", label: "Home" },
@@ -23,19 +24,21 @@ export function Navbar() {
   const [notifs, setNotifs] = useState({ items: [], unread: 0 });
   const navigate = useNavigate();
 
-  const loadNotifs = async () => {
-    if (!user) return;
-    try {
-      const { data } = await api.get("/notifications");
-      setNotifs(data);
-    } catch (e) {}
-  };
-  useEffect(() => {
-    loadNotifs();
-    const id = setInterval(loadNotifs, 20000);
-    return () => clearInterval(id);
-  }, [user]);
+ const loadNotifs = useCallback(async () => {
+  if (!user) return;
 
+  try {
+    const { data } = await api.get("/notifications");
+    setNotifs(data);
+  } catch (e) {}
+}, [user]);
+  useEffect(() => {
+  loadNotifs();
+
+  const id = setInterval(loadNotifs, 20000);
+
+  return () => clearInterval(id);
+}, [loadNotifs]);
   const markAll = async () => {
     await api.post("/notifications/read-all");
     loadNotifs();
