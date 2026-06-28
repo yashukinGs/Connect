@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import {useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
@@ -17,18 +17,30 @@ export default function AdminDashboard() {
   const [selected, setSelected] = useState(null);
   const [updating, setUpdating] = useState(false);
 
-  const load = async () => {
-    const params = { all: true, ...filters };
-    Object.keys(params).forEach(k => (params[k] === "" || params[k] == null) && delete params[k]);
-    const [s, i, o] = await Promise.all([
-      api.get("/stats/admin"),
-      api.get("/issues", { params }),
-      api.get("/officers"),
-    ]);
-    setStats(s.data); setIssues(i.data); setOfficers(o.data);
-  };
-  useEffect(() => { load(); }, []);
-  useEffect(() => { load(); /* refetch on filter change */ }, [filters.status, filters.category, filters.priority]);
+ const load = useCallback(async () => {
+  const params = { all: true, ...filters };
+
+  Object.keys(params).forEach(
+    k => (params[k] === "" || params[k] == null) && delete params[k]
+  );
+
+  const [s, i, o] = await Promise.all([
+    api.get("/stats/admin"),
+    api.get("/issues", { params }),
+    api.get("/officers"),
+  ]);
+
+  setStats(s.data);
+  setIssues(i.data);
+  setOfficers(o.data);
+}, [filters]);
+  useEffect(() => {
+  load();
+}, [load]);
+
+useEffect(() => {
+  load();
+}, [load]);
 
   const cards = [
     { l: "Total Users", v: stats.users, Icon: Users, b: "border-blue-500/20" },
