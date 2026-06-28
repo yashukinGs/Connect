@@ -5,7 +5,7 @@ import { Bell, Menu, X, LogOut, User, LayoutDashboard, ShieldCheck } from "lucid
 import { Logo } from "./Logo";
 import { useAuth } from "../context/AuthContext";
 import api from "../lib/api";
-import { useCallback, useEffect } from "react";
+import { useCallback, } from "react";
 
 const navLinks = [
   { to: "/", label: "Home" },
